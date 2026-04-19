@@ -1,0 +1,25 @@
+name: PR Test Workflow
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-job:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Step1 - print meesage
+        run: echo "Step 1 running"
+
+      - name: Step 2 - Run script
+        run: |
+          echo "Step 2 running"
+          sleep 5
+
+      - name: Step 3 - Final step
+        run: echo "Done"
