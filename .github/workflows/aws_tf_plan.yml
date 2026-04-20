@@ -1,0 +1,57 @@
+#Untuk workflow deploy infras menggunakan terraform untuk AWS , pada github action
+#kita perlu membuat dahulu TF_plan worklownya dalam bentuk "reusable workflow"
+name: "Build_TF_Plan"
+on:
+  workflow_call:
+    #disini kita perlu tentukan apa saja yg menjadi input yg nantinya
+    # value dari input ini kita passing ke "jobs"
+    inputs:
+      path:
+        description: "path terraform module"
+        required: true
+        type: string
+      tf_version:
+        description: "species version terraform"
+        required: true
+        type: string 
+        default: latest
+      gh_environtment:
+        description: "disini tempat kita define multi-envi deployment"
+        required: true
+        type: string
+        default: null      
+      tf_vars_file:
+        description: "disiini tempat kita define variable value untuk module terrafomr"
+        required: true
+        type: string
+
+jobs:
+  build-plan:
+    runs-on: ubuntu-latest
+    #passing value dari input  
+    environment: ${{ inputs.gh_environment }}
+    defaults:
+      run:
+        shell: bash
+        working-directory: ${{ inputs.path }}
+    steps:
+      - name: checkout
+        uses: actions/checkout@4.0
+
+        #kita lakukan rubah file dari .tfvars ke auto.tfvars , 
+        #karena terraform akan secara auto read auto.tvars
+      - name: change filename
+        run:  |
+          mv ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.gh_environment }}.tfvars  ${{ github.workspace }}/${{ inputs.path }}/${{ inputs.gh_environment }}.auto.tfvars 
+
+      - name: Setup Terraform
+        uses: hashicorp/setup-terraform@v2.0.2
+        with:
+          terraform_version: ${{ inputs.tf_version }}
+          cli_config_credentials_token: ${{ secrets.cli_config_credentials_token }}
+
+      - name: Terraform Init
+        id: init
+        run: terraform init
+
+      
