@@ -54,4 +54,16 @@ jobs:
         id: init
         run: terraform init
 
+      - name: Teraform vaidate
+        id: validate
+        run: terraform validate
+      
+      - name: Terraform plan
+        id: plan
+        run: terraform plan
+        continue-on-error: true
+
+      - name: Terraform Plan Status
+        if: steps.plan.outcome == 'failure'
+        run: exit 1
       
